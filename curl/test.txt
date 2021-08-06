@@ -1,0 +1,7 @@
+curl -X POST \
+  http://localhost:9090/test \
+  -H 'Postman-Token: dda6755f-0b3a-44b4-992c-3ee3a4965908' \
+  -H 'cache-control: no-cache' \
+  -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36' \
+  -F 'name=张三' \
+  -F age=18

@@ -1,0 +1,3 @@
+curl -X  \
+  'https://www.baidu.com/?test=the is test' \
+  -H 'cache-control:no-cache' \
