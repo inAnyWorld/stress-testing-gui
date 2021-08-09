@@ -1,0 +1,4 @@
+curl -X GET \
+  'http://10.30.105.50:8089/v1/testApi' \
+  -H 'cache-control:no-cache' \
+

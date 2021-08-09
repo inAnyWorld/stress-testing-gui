@@ -1,0 +1,4 @@
+curl -X GET \
+  'https://github.com/?test=testvalue' \
+  -H 'cache-control:no-cache' \
+

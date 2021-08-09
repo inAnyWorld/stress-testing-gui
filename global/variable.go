@@ -10,8 +10,8 @@ var RequestParams map[string]interface{}
 // RequestUri cURL请求地址
 var RequestUri string
 
-// BufferString 压测报告
-var BufferString bytes.Buffer
+// BufferMap 压测报告
+var BufferMap = map[string]bytes.Buffer{}
 
 // CompleteException 执行结果
 var CompleteException bool
@@ -21,3 +21,6 @@ var ExeException bool
 
 // FrontException 压测前置条件
 //var FrontException bool
+
+// Print 是否打印
+var Print bool

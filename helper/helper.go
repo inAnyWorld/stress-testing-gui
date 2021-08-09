@@ -2,6 +2,7 @@
 package helper
 
 import (
+	"bytes"
 	uuid "github.com/nu7hatch/gouuid"
 	"go-stress-testing/global"
 	"io/ioutil"
@@ -173,15 +174,14 @@ func Ping(uri string) bool {
 // Write2File 写入文件
 func Write2File(writeString string) map[string]string {
 	content := []byte(writeString)
-	fileId, uuidErr := uuid.NewV4()
-	if uuidErr!= nil {
-		log.Println("uuid 生成Err:", uuidErr)
+	fileId := Uuid()
+	if fileId == "false" {
 		return map[string]string{
 			"status": "fail",
-			"message": uuidErr.Error(),
+			"message": "uuid 生成失败",
 		}
 	}
-	fileName := "curl/" + fileId.String() + ".txt"
+	fileName := "curl/" + fileId + ".txt"
 	writeErr := ioutil.WriteFile(fileName, content, 0644)
 	if writeErr != nil {
 		log.Println("cURL 写入Err:", writeErr)
@@ -190,14 +190,31 @@ func Write2File(writeString string) map[string]string {
 			"message": writeErr.Error(),
 		}
 	}
-	log.Println("fileName ", fileName)
+	//log.Println("fileName ", fileName)
 	return map[string]string{
 		"status": "success",
 		"message": fileName,
 	}
 }
 
+// Uuid 生成uuid
+func Uuid() string {
+	fileId, uuidErr := uuid.NewV4()
+	if uuidErr != nil {
+		log.Println("uuid 生成Err:", uuidErr)
+		return "false"
+	}
+	return fileId.String()
+}
+
 // OutputResult 输出到页面的信息
-func OutputResult(print string)  {
-	global.BufferString.WriteString(print)
+func OutputResult(print string, uuid string) {
+	if write, exist := global.BufferMap[uuid]; exist {
+		write.WriteString(print)
+		global.BufferMap[uuid] = write
+		return
+	}
+	var writeBuffer bytes.Buffer
+	writeBuffer.WriteString(print)
+	global.BufferMap[uuid] = writeBuffer
 }

@@ -1,0 +1,4 @@
+curl -X GET \
+  'http://localhost:8080/test?test=testvalue' \
+  -H 'cache-control:no-cache' \
+

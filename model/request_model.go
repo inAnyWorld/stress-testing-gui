@@ -4,7 +4,7 @@ package model
 import (
 	"errors"
 	"fmt"
-	"go-stress-testing/helper"
+	"go-stress-testing/global"
 	"io"
 	"net/http"
 	"strings"
@@ -235,13 +235,14 @@ func (r *Request) Print() {
 	if r == nil {
 		return
 	}
-	result := fmt.Sprintf("请求参数:\n form:%s \n url:%s \n method:%s \n headers:%v \n", r.Form, r.URL, r.Method,
-		r.Headers)
-	result = fmt.Sprintf("%s data:%v \n", result, r.Body)
-	result = fmt.Sprintf("%s verify:%s \n timeout:%s \n debug:%v \n", result, r.Verify, r.Timeout, r.Debug)
-	result = fmt.Sprintf("%s http2.0：%v \n keepalive：%v \n maxCon:%v ", result, r.HTTP2, r.Keepalive, r.MaxCon)
-	fmt.Println(result)
-	helper.OutputResult(result)
+	if global.Print {
+		result := fmt.Sprintf("请求参数:\n form:%s \n url:%s \n method:%s \n headers:%v \n", r.Form, r.URL, r.Method,
+			r.Headers)
+		result = fmt.Sprintf("%s data:%v \n", result, r.Body)
+		result = fmt.Sprintf("%s verify:%s \n timeout:%s \n debug:%v \n", result, r.Verify, r.Timeout, r.Debug)
+		result = fmt.Sprintf("%s http2.0：%v \n keepalive：%v \n maxCon:%v ", result, r.HTTP2, r.Keepalive, r.MaxCon)
+		fmt.Println(result)
+	}
 	return
 }
 

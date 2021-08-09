@@ -1,0 +1,3 @@
+curl -X POST \
+  'https://www.baidu.com/' \
+  -H 'cache-control:no-cache' \

@@ -32,7 +32,7 @@ func init() {
 }
 
 // Dispose 处理函数
-func Dispose(concurrency, totalNumber uint64, request *model.Request) {
+func Dispose(uuid string, concurrency, totalNumber uint64, request *model.Request) {
 	// 设置接收数据缓存
 	ch := make(chan *model.RequestResults, 1000)
 	var (
@@ -40,7 +40,7 @@ func Dispose(concurrency, totalNumber uint64, request *model.Request) {
 		wgReceiving sync.WaitGroup // 数据处理完成
 	)
 	wgReceiving.Add(1)
-	go statistics.ReceivingResults(concurrency, ch, &wgReceiving)
+	go statistics.ReceivingResults(uuid, concurrency, ch, &wgReceiving)
 
 	if request.Keepalive {
 		httplongclinet.CreateLangHttpClient(request)

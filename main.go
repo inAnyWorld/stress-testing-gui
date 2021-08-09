@@ -70,7 +70,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/v1/testApi", TestV1ApiHandler).Methods("GET")
 	r.HandleFunc("/v1/buildCURL", BuildV1CURLHandler).Methods("POST")
-	err := http.ListenAndServe(":8181", r)
+	err := http.ListenAndServe(":8089", r)
 	if err != nil {
 		log.Println("http start or listen failed:", err.Error())
 		return
@@ -104,17 +104,28 @@ func BuildV1CURLHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	uuid := helper.Uuid()
+	if uuid == "false" {
+		returnJson("fail", "uuid 生成失败1", w)
+		return
+	}
+
 	buildCURLFileRsp := helper.BuildCURLHandlerHelper(requestParams)
-	defer global.BufferString.Reset()
+	defer delete(global.BufferMap, uuid)
+
 	if _, ok := buildCURLFileRsp["status"]; ok && buildCURLFileRsp["status"] == "success" {
 		initFlag()
 		if concurrency == 0 || totalNumber == 0 || path == "" {
 			returnJson("fail", "缺乏必要参数,并发数|请求数|接口地址", w)
 			return
 		}
-		doWork()
+		doWork(uuid)
 		if !global.ExeException && global.CompleteException{
-			returnJson("success", global.BufferString.String(), w)
+			if buffer, exist := global.BufferMap[uuid]; exist {
+				returnJson("success", buffer.String(), w)
+				return
+			}
+			returnJson("fail", "结果读取失败", w)
 			return
 		}
 		returnJson("fail", "system error", w)
@@ -126,7 +137,8 @@ func BuildV1CURLHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // doWork 执行压测
-func doWork()  {
+func doWork(uuid string) {
+	//log.Println(uuid)
 	runtime.GOMAXPROCS(1)
 	if concurrency == 0 || totalNumber == 0 || (requestURL == "" && path == "") {
 		log.Printf("示例: go run main.go -c 1 -n 1 -u https://www.baidu.com/ \n")
@@ -142,7 +154,9 @@ func doWork()  {
 		log.Printf("参数不合法 %v \n", err)
 		return
 	}
-	fmt.Printf("\n 开始启动  并发数:%d 请求数:%d 请求参数: \n", concurrency, totalNumber)
+	if global.Print {
+		fmt.Printf("\n 开始启动  并发数:%d 请求数:%d 请求参数: \n", concurrency, totalNumber)
+	}
 	// 输出结果
 	helper.OutputResult(
 		"<h5>执行信息</h5><table border='1'>" +
@@ -156,10 +170,10 @@ func doWork()  {
 					"<td>"+fmt.Sprintf("%d",concurrency) +"</td>" +
 					"<td>"+fmt.Sprintf("%d",totalNumber) +"</td>" +
 				"</tr>" +
-			"</table><br/>")
+			"</table><br/>", uuid)
 	request.Print()
 	// 开始处理
-	server.Dispose(concurrency, totalNumber, request)
+	server.Dispose(uuid, concurrency, totalNumber, request)
 	return
 }
 

@@ -3,6 +3,7 @@ package statistics
 
 import (
 	"fmt"
+	"go-stress-testing/global"
 	"go-stress-testing/helper"
 	"go-stress-testing/tools"
 	"sort"
@@ -27,7 +28,7 @@ var (
 // ReceivingResults 接收结果并处理
 // 统计的时间都是纳秒，显示的时间 都是毫秒
 // concurrent 并发数
-func ReceivingResults(concurrent uint64, ch <-chan *model.RequestResults, wg *sync.WaitGroup) {
+func ReceivingResults(uuid string, concurrent uint64, ch <-chan *model.RequestResults, wg *sync.WaitGroup) {
 	defer func() {
 		wg.Done()
 	}()
@@ -56,14 +57,14 @@ func ReceivingResults(concurrent uint64, ch <-chan *model.RequestResults, wg *sy
 				endTime := uint64(time.Now().UnixNano())
 				requestTime = endTime - statTime
 				go calculateData(concurrent, processingTime, requestTime, maxTime, minTime, successNum, failureNum,
-					chanIDLen, errCode, receivedBytes)
+					chanIDLen, errCode, receivedBytes, uuid)
 			case <-stopChan:
 				// 处理完成
 				return
 			}
 		}
 	}()
-	header()
+	header(uuid)
 	for data := range ch {
 		// fmt.Println("处理一条数据", data.ID, data.Time, data.IsSucceed, data.ErrCode)
 		processingTime = processingTime + data.Time
@@ -98,7 +99,7 @@ func ReceivingResults(concurrent uint64, ch <-chan *model.RequestResults, wg *sy
 	endTime := uint64(time.Now().UnixNano())
 	requestTime = endTime - statTime
 	calculateData(concurrent, processingTime, requestTime, maxTime, minTime, successNum, failureNum, chanIDLen, errCode,
-		receivedBytes)
+		receivedBytes, uuid)
 	//排序后计算 tp50 75 90 95 99
 	all := tools.MyUint64List{}
 	all = RequestTimeList
@@ -113,20 +114,20 @@ func ReceivingResults(concurrent uint64, ch <-chan *model.RequestResults, wg *sy
 	tp90 := fmt.Sprintf("%.3f", float64(all[int(float64(len(all))*0.90)]/1e6))
 	tp95 := fmt.Sprintf("%.3f", float64(all[int(float64(len(all))*0.95)]/1e6))
 	tp99 := fmt.Sprintf("%.3f", float64(all[int(float64(len(all))*0.99)]/1e6))
-
-	fmt.Printf("\n\n")
-	fmt.Println("*************************  结果 start  ****************************")
-	fmt.Println("处理协程数量:", concurrentTotal)
-	// fmt.Println("处理协程数量:", concurrent, "程序处理总时长:", fmt.Sprintf("%.3f", float64(processingTime/concurrent)/1e9), "秒")
-	fmt.Println("请求总数（并发数*请求数 -c * -n）:", requestTotal, "总请求时间:",requestTimeTotal,
-		"秒", "successNum:", successTotal, "failureNum:", failureTotal)
-	fmt.Println("tp90:", tp90)
-	fmt.Println("tp95:", tp95)
-	fmt.Println("tp99:", tp99)
-	fmt.Println("*************************  结果 end   ****************************")
-	fmt.Printf("\n\n")
-
-	helper.OutputResult("<h5>执行结果</h5></table><br/>")
+	if global.Print {
+		fmt.Printf("\n\n")
+		fmt.Println("*************************  结果 start  ****************************")
+		fmt.Println("处理协程数量:", concurrentTotal)
+		// fmt.Println("处理协程数量:", concurrent, "程序处理总时长:", fmt.Sprintf("%.3f", float64(processingTime/concurrent)/1e9), "秒")
+		fmt.Println("请求总数（并发数*请求数 -c * -n）:", requestTotal, "总请求时间:", requestTimeTotal,
+			"秒", "successNum:", successTotal, "failureNum:", failureTotal)
+		fmt.Println("tp90:", tp90)
+		fmt.Println("tp95:", tp95)
+		fmt.Println("tp99:", tp99)
+		fmt.Println("*************************  结果 end   ****************************")
+		fmt.Printf("\n\n")
+	}
+	helper.OutputResult("<h5>执行结果</h5></table><br/>", uuid)
 	helper.OutputResult(
 		"<h5>结果汇总</h5><table border='1'>" +
 				"<tr>" +
@@ -151,12 +152,12 @@ func ReceivingResults(concurrent uint64, ch <-chan *model.RequestResults, wg *sy
 					"<td>"+tp95 +"</td>" +
 					"<td>"+tp99 +"</td>" +
 				"</tr>" +
-			"</table><br/>")
+			"</table><br/>", uuid)
 }
 
 // calculateData 计算数据
 func calculateData(concurrent, processingTime, requestTime, maxTime, minTime, successNum, failureNum uint64,
-	chanIDLen int, errCode map[int]int, receivedBytes int64) {
+	chanIDLen int, errCode map[int]int, receivedBytes int64, uuid string) {
 	if processingTime == 0 {
 		processingTime = 1
 	}
@@ -181,22 +182,24 @@ func calculateData(concurrent, processingTime, requestTime, maxTime, minTime, su
 	requestTimeFloat = float64(requestTime) / 1e9
 	// 打印的时长都为毫秒
 	table(successNum, failureNum, errCode, qps, averageTime, maxTimeFloat, minTimeFloat, requestTimeFloat, chanIDLen,
-		receivedBytes)
+		receivedBytes, uuid)
 }
 
 // header 打印表头信息
-func header() {
-	fmt.Printf("\n\n")
-	// 打印的时长都为毫秒 总请数
-	fmt.Println("─────┬───────┬───────┬───────┬────────┬────────┬────────┬────────┬────────┬────────┬────────")
-	fmt.Println(" 耗时│ 并发数│ 成功数│ 失败数│   qps  │最长耗时│最短耗时│平均耗时│下载字节│字节每秒│ 状态码")
-	fmt.Println("─────┼───────┼───────┼───────┼────────┼────────┼────────┼────────┼────────┼────────┼────────")
-	outputHeader() // 输出表格头
+func header(uuid string) {
+	if global.Print {
+		fmt.Printf("\n\n")
+		// 打印的时长都为毫秒 总请数
+		fmt.Println("─────┬───────┬───────┬───────┬────────┬────────┬────────┬────────┬────────┬────────┬────────")
+		fmt.Println(" 耗时│ 并发数│ 成功数│ 失败数│   qps  │最长耗时│最短耗时│平均耗时│下载字节│字节每秒│ 状态码")
+		fmt.Println("─────┼───────┼───────┼───────┼────────┼────────┼────────┼────────┼────────┼────────┼────────")
+	}
+	outputHeader(uuid) // 输出表格头
 	return
 }
 
 // outputHeader 输出表格头
-func outputHeader()  {
+func outputHeader(uuid string)  {
 	helper.OutputResult(
 		"<table border='1'>" +
 				"<tr>" +
@@ -212,12 +215,12 @@ func outputHeader()  {
 					"<th>下载字节</th>" +
 					"<th>字节每秒</th>" +
 					"<th>状态码/数量</th>" +
-				"</tr>")
+				"</tr>", uuid)
 }
 
 // table 打印表格
 func table(successNum, failureNum uint64, errCode map[int]int,
-	qps, averageTime, maxTimeFloat, minTimeFloat, requestTimeFloat float64, chanIDLen int, receivedBytes int64) {
+	qps, averageTime, maxTimeFloat, minTimeFloat, requestTimeFloat float64, chanIDLen int, receivedBytes int64, uuid string) {
 	var (
 		speed int64
 	)
@@ -257,9 +260,10 @@ func table(successNum, failureNum uint64, errCode map[int]int,
 				"<td>"+fmt.Sprintf("%8s",receivedBytesStr) +"</td>" +
 				"<td>"+fmt.Sprintf("%8s",speedStr) +"</td>" +
 				"<td>"+fmt.Sprintf("%v",printMap(errCode)) +"</td>" +
-			"<tr/>")
-
-	fmt.Println(result)
+			"<tr/>", uuid)
+	if global.Print {
+		fmt.Println(result)
+	}
 	return
 }
 
