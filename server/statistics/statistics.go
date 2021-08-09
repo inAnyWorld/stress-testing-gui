@@ -126,7 +126,7 @@ func ReceivingResults(concurrent uint64, ch <-chan *model.RequestResults, wg *sy
 	fmt.Println("*************************  结果 end   ****************************")
 	fmt.Printf("\n\n")
 
-	helper.OutputResult("</table><br/>")
+	helper.OutputResult("<h5>输出结果</h5></table><br/>")
 	helper.OutputResult(
 		"<table border='1'>" +
 				"<tr>" +
@@ -198,7 +198,7 @@ func header() {
 // outputHeader 输出表格头
 func outputHeader()  {
 	helper.OutputResult(
-		"<table border='1'>" +
+		"<h5>调用过程</h5><table border='1'>" +
 				"<tr>" +
 					"<th>请求详情</th>" +
 					"<th>耗时</th>" +

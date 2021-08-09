@@ -199,22 +199,22 @@
 
     function startTest() {
         // 必要参数校验
-        // var checkUri = $("#uri-val").val();
-        // var checkMethod = $("#method-val").val();
-        // var checkConcurrent = $("#concurrent-val").val();
-        // var checkRequest = $("#request-val").val();
-        // if (checkUri == "") {
-        //     layer.msg("请填写接口地址");
-        //     return false;
-        // }
-        // if (checkConcurrent < 1 || checkRequest < 1) {
-        //     layer.msg("并发数和请求数都至少大于等于1");
-        //     return false;
-        // }
-        // if (checkMethod == "") {
-        //     layer.msg("请选择请求方式");
-        //     return false;
-        // }
+        var checkUri = $("#uri-val").val();
+        var checkMethod = $("#method-val").val();
+        var checkConcurrent = $("#concurrent-val").val();
+        var checkRequest = $("#request-val").val();
+        if (checkUri == "") {
+            layer.msg("请填写接口地址");
+            return false;
+        }
+        if (checkConcurrent < 1 || checkRequest < 1) {
+            layer.msg("并发数和请求数都至少大于等于1");
+            return false;
+        }
+        if (checkMethod == "") {
+            layer.msg("请选择请求方式");
+            return false;
+        }
 
         var fieldsObj = {}; //声明一个对象
         var isExistsArray = [

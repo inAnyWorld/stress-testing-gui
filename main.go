@@ -71,7 +71,7 @@ func main() {
 	r.HandleFunc("/v1/buildCURL", BuildV1CURLHandler).Methods("POST")
 	err := http.ListenAndServe(":8181", r)
 	if err != nil {
-		log.Println("http start or listen failed")
+		log.Println("http start or listen failed:", err.Error())
 		return
 	}
 }
@@ -80,13 +80,13 @@ func main() {
 func TestV1ApiHandler(w http.ResponseWriter, r *http.Request) {
 	templateFiles, templateErr := template.ParseFiles("web/test.html")
 	if templateErr != nil {
-		log.Println("ParseFiles Error")
+		log.Println("ParseFiles Error:", templateErr.Error())
 		return
 	}
 	templateVar = templateFiles
 	templateExeErr := templateVar.Execute(w, nil)
 	if templateExeErr != nil {
-		log.Println("Execute Error")
+		log.Println("Execute Error:", templateExeErr.Error())
 		return
 	}
 }
@@ -153,7 +153,7 @@ func doWork()  {
 	fmt.Printf("\n 开始启动  并发数:%d 请求数:%d 请求参数: \n", concurrency, totalNumber)
 	// 输出结果
 	helper.OutputResult(
-		"<table border='1'>" +
+		"<h5>执行信息</h5><table border='1'>" +
 				"<tr>" +
 					"<th>执行信息</th>" +
 					"<th>并发数</th>" +
