@@ -33,13 +33,13 @@ func BuildCURLHandlerHelper(requestMap map[string]interface{}) map[string]string
 	if _, ok := requestMap["uri"]; !ok {
 		return map[string]string{
 			"status": "fail",
-			"message": "uri empty",
+			"message": "接口地址缺失",
 		}
 	}
 	if !Ping(requestMap["uri"].(string)) {
 		return map[string]string{
 			"status": "fail",
-			"message": "uri ping error",
+			"message": "接口地址不合法",
 		}
 	}
 	var write2File string
@@ -197,6 +197,7 @@ func Write2File(writeString string) map[string]string {
 	}
 }
 
+// OutputResult 输出到页面的信息
 func OutputResult(print string)  {
 	global.BufferString.WriteString(print)
 }

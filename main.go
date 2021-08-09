@@ -47,6 +47,7 @@ var (
 	http2       = false           // 是否开http2.0
 	keepalive   = false           // 是否开启长连接
 )
+
 var templateVar *template.Template
 
 // initFlag 设置压测必要参数
@@ -93,44 +94,35 @@ func TestV1ApiHandler(w http.ResponseWriter, r *http.Request) {
 
 // BuildV1CURLHandler 构建cURL请求体
 func BuildV1CURLHandler(w http.ResponseWriter, r *http.Request) {
-	var requestMap map[string]interface{}
-	var returnMessage, returnStatus string
+	var requestParams map[string]interface{}
 	rBody, _ := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	err := json.Unmarshal(rBody, &requestMap)
-	if err != nil {
-		returnMessage = fmt.Sprintf("json Unmarshal Err: %v", err.Error())
-		returnStatus = "fail"
-		log.Println(returnMessage)
-		global.FrontException = true
-	} else {
-		buildCURLFileRsp := helper.BuildCURLHandlerHelper(requestMap)
-		if _, ok := buildCURLFileRsp["status"]; ok && buildCURLFileRsp["status"] == "success" {
-			initFlag()
-			doWork()
-			if !global.ExeException && global.CompleteException{
-				returnMessage = global.BufferString.String()
-				returnStatus = "success"
-			} else {
-				returnMessage = "system error"
-			}
-		}
+	jsonErr := json.Unmarshal(rBody, &requestParams)
+	if jsonErr != nil {
+		log.Println("json Unmarshal Err: ", jsonErr.Error())
+		returnJson("fail", fmt.Sprintf("json Unmarshal Err: %v", jsonErr.Error()), w)
+		return
 	}
+
+	buildCURLFileRsp := helper.BuildCURLHandlerHelper(requestParams)
 	defer global.BufferString.Reset()
-	//返回数据
-	response := map[string]interface{}{
-		"code":200,
-		"status": returnStatus,
-		"msg": returnMessage,
+	if _, ok := buildCURLFileRsp["status"]; ok && buildCURLFileRsp["status"] == "success" {
+		initFlag()
+		if concurrency == 0 || totalNumber == 0 || path == "" {
+			returnJson("fail", "缺乏必要参数,并发数|请求数|接口地址", w)
+			return
+		}
+		doWork()
+		if !global.ExeException && global.CompleteException{
+			returnJson("success", global.BufferString.String(), w)
+			return
+		}
+		returnJson("fail", "system error", w)
+		return
 	}
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("content-Type","application/json")
-	indent, indentErr := json.MarshalIndent(response, "", "\t")
-	if indentErr != nil {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("not found data"))
-	}
-	w.Write(indent)
+
+	returnJson("fail", buildCURLFileRsp["message"], w)
+	return
 }
 
 // doWork 执行压测
@@ -169,4 +161,22 @@ func doWork()  {
 	// 开始处理
 	server.Dispose(concurrency, totalNumber, request)
 	return
+}
+
+// returnJson 封装返回
+func returnJson(status string, message string, w http.ResponseWriter) {
+	//返回数据
+	response := map[string]interface{}{
+		"code":200,
+		"status": status,
+		"msg": message,
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("content-Type","application/json")
+	indent, indentErr := json.MarshalIndent(response, "", "\t")
+	if indentErr != nil {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("not found data"))
+	}
+	w.Write(indent)
 }

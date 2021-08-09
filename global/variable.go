@@ -20,4 +20,4 @@ var CompleteException bool
 var ExeException bool
 
 // FrontException 压测前置条件
-var FrontException bool
+//var FrontException bool
