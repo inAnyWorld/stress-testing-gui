@@ -1,4 +1,0 @@
-curl -X GET \
-  'https://www.baidu.com/?key=test' \
-  -H 'cache-control:no-cache' \
-
