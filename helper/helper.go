@@ -62,7 +62,7 @@ func BuildCURLHandlerHelper(requestMap map[string]interface{}) map[string]string
 	uri := requestMap["uri"].(string)
 	if paramsString != "" {
 		if strings.Contains(requestMap["uri"].(string), "?") {
-			uri = requestMap["uri"].(string) + paramsString
+			uri = requestMap["uri"].(string) + `&` + paramsString
 		} else {
 			uri = requestMap["uri"].(string) + `?` + paramsString
 		}
