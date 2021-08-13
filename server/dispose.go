@@ -4,6 +4,7 @@ package server
 import (
 	"fmt"
 	"go-stress-testing/global"
+	"go-stress-testing/helper"
 	httplongclinet "go-stress-testing/server/client/http_longclinet"
 	"log"
 	"sync"
@@ -32,7 +33,7 @@ func init() {
 }
 
 // Dispose 处理函数
-func Dispose(uuid string, concurrency, totalNumber uint64, request *model.Request) {
+func Dispose(uuid string, concurrency, totalNumber uint64, request *model.Request, exception *global.Exception) {
 	// 设置接收数据缓存
 	ch := make(chan *model.RequestResults, 1000)
 	var (
@@ -59,7 +60,7 @@ func Dispose(uuid string, concurrency, totalNumber uint64, request *model.Reques
 				err := ws.GetConn()
 				if err != nil {
 					log.Println("连接失败:", i, err)
-					global.ExeException = true
+					helper.SetExeException(exception)
 					continue
 				}
 				go golink.WebSocket(i, ch, totalNumber, &wg, request, ws)
@@ -71,7 +72,7 @@ func Dispose(uuid string, concurrency, totalNumber uint64, request *model.Reques
 					err := ws.GetConn()
 					if err != nil {
 						log.Println("连接失败:", i, err)
-						global.ExeException = true
+						helper.SetExeException(exception)
 						return
 					}
 					golink.WebSocket(i, ch, totalNumber, &wg, request, ws)
@@ -88,7 +89,7 @@ func Dispose(uuid string, concurrency, totalNumber uint64, request *model.Reques
 			err := ws.Link()
 			if err != nil {
 				log.Println("连接失败:", i, err)
-				global.ExeException = true
+				helper.SetExeException(exception)
 				continue
 			}
 			go golink.Grpc(i, ch, totalNumber, &wg, request, ws)
@@ -104,6 +105,6 @@ func Dispose(uuid string, concurrency, totalNumber uint64, request *model.Reques
 	close(ch)
 	// 数据全部处理完成了
 	wgReceiving.Wait()
-	global.CompleteException = true
+	helper.SetCompleteException(exception)
 	return
 }

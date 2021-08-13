@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>web test</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://www.layuicdn.com/layui/css/layui.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://www.layuicdn.com/layui/layui.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="col-xs-3 col-sm-9">
+        <form id="startTest" role="form" action="##" method="" onsubmit="return false">
+            <!-- 接口地址 -->
+            <div id="uri">
+                <p class="breadcrumb">接口地址</p>
+                <div class="form-group">
+                    <textarea id="uri-val" name = "uri" class="form-control" type="text" placeholder="接口地址"></textarea>
+                </div>
+            </div>
+
+            <!-- Headers -->
+            <div id="concurrent-request">
+                <hr class="bg-gray">
+                <p class="breadcrumb">QPS</p>
+                <div id="header-html1">
+                    <div class="row">
+                        <div class="col-lg-2" id="concurrent">
+                            <input id="qps-val" name = "qps" value="1" type="number"  min="1" max="999999" class="form-control" placeholder="并发数">
+                            <span class="help-block">QPS</span>
+                        </div>
+                        <div class="col-lg-3" id = "request">
+                            <input id="time-val" name = "time" value="1" type="number"  min="1" max="999999" class="form-control" placeholder="请求数">
+                            <span class="help-block">压测总时长(单位秒)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 请求方式 -->
+            <div id="method">
+                <hr class="bg-gray">
+                <p class="breadcrumb">请求方式</p>
+                <div class="form-group">
+                    <select id="method-val" name = "method" class="form-control" >
+                        <option value="">请求方式</option>
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <!-- <option value="HEAD">head</option>
+                        <option value="PUT">put</option>
+                        <option value="DELETE">delete</option>
+                        <option value="CONNECT">connect</option>
+                        <option value="OPTIONS">options</option>
+                        <option value="TRACE">trace</option>
+                        <option value="PATCH">patch</option> -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Headers -->
+            <div id="headers">
+                <hr class="bg-gray">
+                <p class="breadcrumb">Headers</p>
+
+                <div id="header-html">
+                    <div class="row" id="header-html-0">
+                        <div class="col-lg-3">
+                            <input name = "headers-key[]" type="text" class="form-control" placeholder="key" value="cache-control">
+                        </div>
+                        <div class="col-lg-8">
+                            <input name = "headers-value[]" type="text" class="form-control" placeholder="value" value="no-cache">
+                        </div>
+                        <div>
+                            <button onclick="addHtml('headers')" type="button" class="btn btn-success">添加</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Params -->
+            <div id="params">
+                <hr class="bg-gray">
+                <p class="breadcrumb">Params</p>
+                <div id="params-html">
+                    <div class="row" id="params-html-0">
+                        <div class="col-lg-3">
+                            <input name = "params-key[]" type="text" class="form-control" placeholder="key">
+                        </div>
+                        <div class="col-lg-8">
+                            <input name = "params-value[]" type="text" class="form-control" placeholder="value">
+                        </div>
+                        <div>
+                            <button onclick="addHtml('params')" type="button" class="btn btn-success">添加</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div id="bodys">
+                <hr class="bg-gray">
+                <p class="breadcrumb">Body</p>
+                <div class="form-group">
+                    <select name = "body" id="body" class="form-control">
+                        <option value="">Body</option>
+                        <option value="none">none</option>
+                        <option value="form-data">form-data</option>
+                        <option value="x-www-form-urlencoded">x-www-form-urlencoded</option>
+                        <option value="raw">raw</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- form-data -->
+            <div id="form-data">
+                <hr class="bg-gray">
+                <p class="breadcrumb">form-data</p>
+                <div id="form-data-html">
+                    <div class="row" id="form-data-html-0">
+                        <div class="col-lg-3">
+                            <input name = "form-data-key[]" type="text" class="form-control" placeholder="key">
+                        </div>
+                        <div class="col-lg-8">
+                            <input name = "form-data-value[]" type="text" class="form-control" placeholder="value">
+                        </div>
+                        <div>
+                            <button onclick="addHtml('form-data')" type="button" class="btn btn-success">添加</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- x-www-form-urlencoded -->
+            <div id="x-www-form-urlencoded">
+                <hr class="bg-gray">
+                <p class="breadcrumb">x-www-form-urlencoded</p>
+                <div id="x-www-form-urlencoded-html">
+                    <div class="row" id="x-www-form-urlencoded-html-0">
+                        <div class="col-lg-3">
+                            <input name = "x-www-form-urlencoded-key[]" type="text" class="form-control" placeholder="key">
+                        </div>
+                        <div class="col-lg-8">
+                            <input name = "x-www-form-urlencoded-value[]" type="text" class="form-control" placeholder="value">
+                        </div>
+                        <div>
+                            <button onclick="addHtml('x-www-form-urlencoded')" type="button" class="btn btn-success">添加</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- raw -->
+            <hr class="bg-gray">
+            <div id="raw-option">
+                <p class="breadcrumb">raw类型</p>
+                <div class="form-group">
+                    <select name = "raw-type" id="raw-type" class="form-control" >
+                        <option value="">raw</option>
+                        <option value="text">text</option>
+                        <option value="text-plain">text(text/plain)</option>
+                        <option value="text-xml">xml(text/xml)</option>
+                        <option value="text-html">html(text/html)</option>
+                        <option value="app-json">json(application/json)</option>
+                        <option value="app-js">javascript(application/javascript)</option>
+                        <option value="app-xml">xml(application/xml)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="raw">
+                <hr class="bg-gray">
+                <p class="breadcrumb">raw</p>
+                <div class="form-group">
+                    <textarea name = "raw" id="raw-value" class="form-control" type="text" placeholder="raw"></textarea>
+                </div>
+            </div>
+
+            <div id="raw-app-json">
+                <hr class="bg-gray">
+                <p class="breadcrumb">application/json</p>
+                <div id="raw-app-json-html">
+                    <div class="row" id="raw-app-json-html-0">
+                        <div class="col-lg-3">
+                            <input name = "raw-app-json-key[]" type="text" class="form-control" placeholder="key">
+                        </div>
+                        <div class="col-lg-8">
+                            <input name = "raw-app-json-value[]" type="text" class="form-control" placeholder="value">
+                        </div>
+                        <div>
+                            <button onclick="addHtml('raw-app-json')" type="button" class="btn btn-success">添加</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <hr class="bg-gray">
+                <input id="submit" onclick="startTest()" type="button" class="btn btn-info" value="开始压测">
+                <a href="javascript:location.reload();" style="float: right" id="reset" class="btn btn-default" >refresh</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
+<script>
+    $(function(){
+        $("#form-data").hide();
+        $("#x-www-form-urlencoded").hide();
+        $("#raw-option").hide();
+        $("#raw").hide();
+        $("#bodys").hide();
+        $("#raw-app-json").hide();
+    });
+
+    function startTest() {
+        // 必要参数校验
+        var checkUri = $("#uri-val").val();
+        var checkMethod = $("#method-val").val();
+        var checkQps = $("#qps-val").val();
+        var checkTime = $("#time-val").val();
+        if (checkUri == "") {
+            layer.msg("请填写接口地址");
+            return false;
+        }
+        if (checkQps < 1 || checkTime < 1) {
+            layer.msg("qps和压测时长都至少大于等于1");
+            return false;
+        }
+        if (checkMethod == "") {
+            layer.msg("请选择请求方式");
+            return false;
+        }
+
+        var fieldsObj = {}; //声明一个对象
+        var isExistsArray = [
+            "headers-key[]", "headers-value[]",
+            "params-key[]", "params-value[]",
+            "form-data-key[]", "form-data-value[]",
+            "x-www-form-urlencoded-key[]", "x-www-form-urlencoded-value[]",
+            "raw-app-json-key[]", "raw-app-json-value[]"
+        ];
+        var fields = $('#startTest').serializeArray();
+        var isAppJson = $("#raw-type").val() == "app-json";
+
+        $.each(fields, function(index, field) {
+            if ($.inArray(field.name, isExistsArray) === -1) {
+                fieldsObj[field.name] = field.value; //通过变量，将属性值，属性一起放到对象中
+            }
+        })
+        fieldsObj['headers'] = buildPairParams("headers-key[]", "headers-value[]");
+        fieldsObj['params'] = buildPairParams("params-key[]", "params-value[]");
+        fieldsObj['form-data'] = buildPairParams("form-data-key[]", "form-data-value[]");
+        fieldsObj['x-www-form-urlencoded'] = buildPairParams("x-www-form-urlencoded-key[]", "x-www-form-urlencoded-value[]");
+        if (isAppJson) {
+            fieldsObj['raw'] = buildPairParams("raw-app-json-key[]", "raw-app-json-value[]");
+        }
+        fieldsObj['timestamp'] = timestamp();
+        var qps = JSON.stringify(fieldsObj);
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            url: "http://localhost:8089/v1/sendHttpRequest",
+            data: qps,
+            layerIndex: -1,
+            beforeSend: function () {
+                this.layerIndex = layer.load(1, {
+                    shade: [0.1,'#fff']
+                });
+            },
+            complete: function () {
+                layer.close(this.layerIndex);
+            },
+            success: function (result) {
+                layer.alert(result.msg);
+            },
+            error : function(res) {
+                layer.msg("system error");
+            }
+        });
+    }
+
+    // method
+    $("#method-val").change(function(){
+        if ($("#method-val").val() == "POST") {
+            $("#bodys").show();
+        } else {
+            $("#bodys").hide();
+        }
+    });
+    // body
+    $("#body").change(function(){
+        switch($("#body").val()) {
+            case "form-data":
+                $("#form-data").show();
+                $("#x-www-form-urlencoded").hide();
+                $("#raw-option").hide();
+                $("#raw").hide();
+                break;
+            case "x-www-form-urlencoded":
+                $("#form-data").hide();
+                $("#x-www-form-urlencoded").show();
+                $("#raw-option").hide();
+                $("#raw").hide();
+                break;
+            case "raw":
+                $("#form-data").hide();
+                $("#x-www-form-urlencoded").hide();
+                $("#raw").hide();
+                $("#raw-option").show();
+                break;
+            default:
+                $("#form-data").hide();
+                $("#x-www-form-urlencoded").hide();
+                $("#raw-option").hide();
+                $("#raw").hide();
+        }
+    });
+
+    // raw-type
+    $("#raw-type").change(function(){
+        if ($("#raw-type").val() == "") {
+            $("#raw-app-json").hide();
+            $("#raw").hide();
+        } else {
+            if ($("#raw-type").val() == "app-json") {
+                $("#raw-app-json").show();
+                $("#raw").hide();
+            } else{
+                $("#raw-app-json").hide();
+                $("#raw").show();
+            }
+        }
+    });
+    // addHtml 追加html
+    var headerId = paramsId = formDataId = xWwwFormUrlencodedId = appJsonId = 0;
+    function addHtml(type) {
+        var htmlId = content = "";
+        if (type == "headers") {
+            headerId ++;
+            htmlId  = 'header-html';
+            content = '<div class="row" id="header-html-'+headerId+'">'+
+                '<br/>'+
+                '<div class="col-lg-3">'+
+                '<input name = "headers-key[]" type="text" class="form-control" placeholder="key">'+
+                '</div>'+
+                '<div class="col-lg-8">'+
+                '<input name = "headers-value[]" type="text" class="form-control" placeholder="value">'+
+                '</div>'+
+                '<div>'+
+                '<button onclick="delHtml(1, '+headerId+')" type="button" class="btn btn-danger">减少</button>'+
+                '</div>'+
+                '</div>';
+        }
+        if (type == "params") {
+            paramsId ++;
+            htmlId  = 'params-html';
+            content = '<div class="row" id="params-html-'+paramsId+'">'+
+                '<br/>'+
+                '<div class="col-lg-3">'+
+                '<input name = "params-key[]" type="text" class="form-control" placeholder="key">'+
+                '</div>'+
+                '<div class="col-lg-8">'+
+                '<input name = "params-value[]" type="text" class="form-control" placeholder="value">'+
+                '</div>'+
+                '<div>'+
+                '<button onclick="delHtml(2, '+paramsId+')" type="button" class="btn btn-danger">减少</button>'+
+                '</div>'+
+                '</div>';
+        }
+        if (type == "form-data") {
+            formDataId ++;
+            htmlId = 'form-data-html';
+            content = '<div class="row" id="form-data-html-'+formDataId+'">'+
+                '<br/>'+
+                '<div class="col-lg-3">'+
+                '<input name = "form-data-key[]" type="text" class="form-control" placeholder="key">'+
+                '</div>'+
+                '<div class="col-lg-8">'+
+                '<input name = "form-data-value[]" type="text" class="form-control" placeholder="value">'+
+                '</div>'+
+                '<div>'+
+                '<button onclick="delHtml(3, '+formDataId+')" type="button" class="btn btn-danger">减少</button>'+
+                '</div>'
+            '</div>';
+        }
+
+        if (type == "x-www-form-urlencoded") {
+            xWwwFormUrlencodedId ++;
+            htmlId = 'x-www-form-urlencoded-html';
+            content = '<div class="row" id="x-www-form-urlencoded-html-'+xWwwFormUrlencodedId+'">'+
+                '<br/>'+
+                '<div class="col-lg-3">'+
+                '<input name = "x-www-form-urlencoded-key[]" type="text" class="form-control" placeholder="key">'+
+                '</div>'+
+                '<div class="col-lg-8">'+
+                '<input name = "x-www-form-urlencoded-value[]" type="text" class="form-control" placeholder="value">'+
+                '</div>'+
+                '<div>'+
+                '<button onclick="delHtml(4, '+xWwwFormUrlencodedId+')" type="button" class="btn btn-danger">减少</button>'+
+                '</div>'+
+                '</div>';
+        }
+
+        if (type == "raw-app-json") {
+            appJsonId ++;
+            htmlId = 'raw-app-json-html';
+            content = '<div class="row" id="raw-app-json-html-'+appJsonId+'">'+
+                '<br/>'+
+                '<div class="col-lg-3">'+
+                '<input name = "raw-app-json-key[]" type="text" class="form-control" placeholder="key">'+
+                '</div>'+
+                '<div class="col-lg-8">'+
+                '<input name = "raw-app-json-value[]" type="text" class="form-control" placeholder="value">'+
+                '</div>'+
+                '<div>'+
+                '<button onclick="delHtml(5, '+appJsonId+')" type="button" class="btn btn-danger">减少</button>'+
+                '</div>'+
+                '</div>';
+        }
+
+        $(content).appendTo('#' + htmlId);
+    }
+
+    // delHtml 删除html
+    function delHtml(types, id) {
+        var htmlId = "";
+        if (types == 1) htmlId = "header-html-";
+        if (types == 2) htmlId = "params-html-";
+        if (types == 3) htmlId = "form-data-html-";
+        if (types == 4) htmlId = "x-www-form-urlencoded-html-";
+        if (types == 5) htmlId = "raw-app-json-html-";
+        $("#" + htmlId + id).remove();
+    }
+
+    // 获取成对的参数
+    function buildPairParams(nameKey, valueKey) {
+        var keyObj   = {};
+        var valueObj = {};
+        var pairObj  = {};
+        // 只要有一个为空则返回一个空对象
+        if ($("input[name='"+nameKey+"']").val() == "" || $("input[name='"+valueKey+"']").val() == "") {
+            return pairObj;
+        }
+        $("input[name='"+nameKey+"']").each(function(index, item){
+            keyObj[index] = item.value;
+        });
+
+        $("input[name='"+valueKey+"']").each(function(index, item){
+            valueObj[index] = item.value;
+        });
+
+        for(var index in keyObj) {
+            pairObj[decodeURIComponent(keyObj[index])] = decodeURIComponent(valueObj[index]);
+        }
+        return pairObj;
+    }
+
+    // 客户端请求时间
+    function timestamp() {
+        var time = Date.parse(new Date()).toString();
+        return  time.substr(0,10);
+    }
+</script>

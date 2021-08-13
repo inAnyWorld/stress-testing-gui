@@ -9,6 +9,7 @@ import (
 	"go-stress-testing/helper"
 	"go-stress-testing/model"
 	"go-stress-testing/server"
+	"go-stress-testing/server/gohttp"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -69,7 +70,9 @@ func initFlag() {
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/v1/testApi", TestV1ApiHandler).Methods("GET")
+	r.HandleFunc("/v1/testQPS", TestV1ApiQPSHandler).Methods("GET")
 	r.HandleFunc("/v1/buildCURL", BuildV1CURLHandler).Methods("POST")
+	r.HandleFunc("/v1/sendHttpRequest", SendHttpRequest).Methods("POST")
 	err := http.ListenAndServe(":8089", r)
 	if err != nil {
 		log.Println("http start or listen failed:", err.Error())
@@ -79,7 +82,7 @@ func main() {
 
 // TestV1ApiHandler 模板
 func TestV1ApiHandler(w http.ResponseWriter, r *http.Request) {
-	templateFiles, templateErr := template.ParseFiles("web/test.html")
+	templateFiles, templateErr := template.ParseFiles("web/testApi.html")
 	if templateErr != nil {
 		log.Println("ParseFiles Error:", templateErr.Error())
 		return
@@ -90,6 +93,62 @@ func TestV1ApiHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Execute Error:", templateExeErr.Error())
 		return
 	}
+}
+
+// TestV1ApiQPSHandler 模板
+func TestV1ApiQPSHandler(w http.ResponseWriter, r *http.Request) {
+	templateFiles, templateErr := template.ParseFiles("web/testQPS.html")
+	if templateErr != nil {
+		log.Println("ParseFiles QPS Error:", templateErr.Error())
+		return
+	}
+	templateVar = templateFiles
+	templateExeErr := templateVar.Execute(w, nil)
+	if templateExeErr != nil {
+		log.Println("Execute QPS Error:", templateExeErr.Error())
+		return
+	}
+}
+
+// SendHttpRequest 发送请求
+func SendHttpRequest(w http.ResponseWriter, r *http.Request) {
+	var requestParams map[string]interface{}
+	rBody, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	jsonErr := json.Unmarshal(rBody, &requestParams)
+	if jsonErr != nil {
+		log.Println("json Unmarshal Err: ", jsonErr.Error())
+		returnJson("fail", fmt.Sprintf("json Unmarshal Err: %v", jsonErr.Error()), w)
+		return
+	}
+	if !helper.Ping(requestParams["uri"].(string)) {
+		returnJson("fail", "接口地址不合法", w)
+		return
+	}
+	uuid := helper.Uuid()
+	defer delete(global.BufferMap, uuid)
+	requestParams["uuid"] = uuid
+	helper.OutputResult(
+		"<table border='1'>" +
+			"<tr>" +
+				"<th>QPS</th>" +
+				"<th>压测总时长</th>" +
+				"<th>请求耗时</th>" +
+				"<th>成功数</th>" +
+				"<th>失败数</th>" +
+			"</tr>", requestParams["uuid"].(string))
+	if requestParams["method"].(string) == global.GET {
+		gohttp.HttpRequestGet(requestParams)
+	}
+	if requestParams["method"].(string) == global.POST {
+		gohttp.HttpRequestPost(requestParams)
+	}
+	if buffer, exist := global.BufferMap[uuid]; exist {
+		returnJson("success", buffer.String(), w)
+		return
+	}
+	returnJson("fail","system error", w)
+	return
 }
 
 // BuildV1CURLHandler 构建cURL请求体
@@ -119,8 +178,10 @@ func BuildV1CURLHandler(w http.ResponseWriter, r *http.Request) {
 			returnJson("fail", "缺乏必要参数,并发数|请求数|接口地址", w)
 			return
 		}
-		doWork(uuid)
-		if !global.ExeException && global.CompleteException{
+		var exception global.Exception
+		doWork(uuid, &exception)
+
+		if !exception.ExeException && exception.CompleteException {
 			if buffer, exist := global.BufferMap[uuid]; exist {
 				returnJson("success", buffer.String(), w)
 				return
@@ -137,20 +198,20 @@ func BuildV1CURLHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // doWork 执行压测
-func doWork(uuid string) {
+func doWork(uuid string, exception *global.Exception) {
 	//log.Println(uuid)
 	runtime.GOMAXPROCS(1)
 	if concurrency == 0 || totalNumber == 0 || (requestURL == "" && path == "") {
 		log.Printf("示例: go run main.go -c 1 -n 1 -u https://www.baidu.com/ \n")
 		log.Printf("压测地址或curl路径必填 \n")
 		log.Printf("当前请求参数: -c %d -n %d -d %v -u %s \n", concurrency, totalNumber, debugStr, requestURL)
-		global.ExeException = true
+		helper.SetExeException(exception)
 		return
 	}
 	debug := strings.ToLower(debugStr) == "true"
 	request, err := model.NewRequest(requestURL, verify, code, 0, debug, path, headers, body, maxCon, http2, keepalive)
 	if err != nil {
-		global.ExeException = true
+		helper.SetExeException(exception)
 		log.Printf("参数不合法 %v \n", err)
 		return
 	}
@@ -173,7 +234,7 @@ func doWork(uuid string) {
 			"</table><br/>", uuid)
 	request.Print()
 	// 开始处理
-	server.Dispose(uuid, concurrency, totalNumber, request)
+	server.Dispose(uuid, concurrency, totalNumber, request, exception)
 	return
 }
 

@@ -47,8 +47,8 @@
                 <div class="form-group">
                     <select id="method-val" name = "method" class="form-control" >
                         <option value="">请求方式</option>
-                        <option value="GET">get</option>
-                        <option value="POST">post</option>
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
                         <!-- <option value="HEAD">head</option>
                         <option value="PUT">put</option>
                         <option value="DELETE">delete</option>
@@ -195,6 +195,7 @@
         $("#x-www-form-urlencoded").hide();
         $("#raw-option").hide();
         $("#raw").hide();
+        $("#bodys").hide();
     });
 
     function startTest() {
@@ -258,6 +259,15 @@
             }
         });
     }
+
+    // method
+    $("#method-val").change(function(){
+        if ($("#method-val").val() == "POST") {
+            $("#bodys").show();
+        } else {
+            $("#bodys").hide();
+        }
+    });
 
     // body
     $('#body').change(function(){
