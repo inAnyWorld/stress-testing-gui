@@ -288,7 +288,7 @@ func HttpPost(requestParams map[string]interface{}) map[string]interface{} {
 	if requestParams["body"].(string) == global.XWwwFormUrlencoded {
 		requestBody = []byte(MapToJson(requestParams["x-www-form-urlencoded"].(map[string]interface{})))
 	}
-	log.Println(requestParams["raw"].(map[string]interface{}))
+
 	if requestParams["body"].(string) == global.Raw {
 		requestBody = []byte(MapToJson(requestParams["raw"].(map[string]interface{})))
 	}
