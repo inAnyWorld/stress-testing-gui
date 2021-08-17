@@ -5,7 +5,7 @@
 > 并发模式会在后端构建请求的CURL请求体；QPS模式后端程序会在压测时间内向目标接口发送指定数量请求QPS约等于总请求数/请求时间。
  
 >* 第一版目前只支持HTTP请求,请求方式目前开放了GET, POST
->* 命令行版本☞☞☞ https://github.com/applytogetintoyourlife/stress-testing（支持变参压测）
+>* 命令行版本（支持变参压测）☞☞☞ https://github.com/applytogetintoyourlife/stress-testing
 >* 作者邮箱 code301@163.com 欢迎交流
 >* 部分功能截图
 ![image](https://user-images.githubusercontent.com/42194819/128487170-54c5e765-6e52-435a-8394-71c0a659e0e5.png)
