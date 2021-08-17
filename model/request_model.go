@@ -85,7 +85,7 @@ type Request struct {
 	MaxCon    int               // 每个连接的请求数
 	HTTP2     bool              // 是否使用http2.0
 	Keepalive bool              // 是否开启长连接
-	Code      int               //验证的状态码
+	Code      int               // 验证的状态码
 }
 
 // GetBody 获取请求数据

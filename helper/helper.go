@@ -358,11 +358,9 @@ func SetContentType(requestParams map[string]interface{})  string {
 		if requestParams["raw-type"].(string) == global.Json {
 			return global.AppJson
 		}
-
 		if requestParams["raw-type"].(string) == global.Plain {
 			return global.AppTextPlain
 		}
-
 		if requestParams["raw-type"].(string) == global.XmlTX {
 			return global.TextXml
 		}
@@ -375,7 +373,6 @@ func SetContentType(requestParams map[string]interface{})  string {
 		if requestParams["raw-type"].(string) == global.Html {
 			return global.TextHtml
 		}
-
 		if requestParams["raw-type"].(string) == global.Text {
 			return global.AppJson
 		}

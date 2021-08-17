@@ -15,7 +15,7 @@ var (
 	once           sync.Once
 )
 
-//初始化长连接客户端参数
+// CreateLangHttpClient 初始化长连接客户端参数
 func CreateLangHttpClient(request *model.Request) {
 	once.Do(func() {
 		tr := &http.Transport{}
